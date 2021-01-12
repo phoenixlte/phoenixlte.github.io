@@ -40,6 +40,12 @@
             <a class="nav-link js-scroll-trigger" href="#about">Overview</a>
           </li>
           <li class="nav-item">
+            <a class="nav-link js-scroll-trigger" href="#implementation">Implementation</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link js-scroll-trigger" href="#results">Results</a>
+          </li>
+          <li class="nav-item">
             <a class="nav-link js-scroll-trigger" href="#signatures">Signatures</a>
           </li>
           <li class="nav-item">
@@ -60,32 +66,66 @@
 
   <section id="about">
     <div class="container">
-      <div class="row">
-          <h2 class="text-center">Overview</h2>
+          <h2>Overview</h2>
           <p class="lead">With the ever-increasing demand of cellular devices, the vulnerabilities pertaining to network traffic are increasing as well. Dealing with such vulnerabilities required a system that would thwart the network attack attempts and mitigate these vulnerabilites, hence proposed <b>Phoenix</b>. Following are the salient features of Phoenix:</p>
           <ul>
             <li>Phoenix monitors device side cellular traffic by performing signature-based run-time verification</li>
             <li>Signatures can be manually crafted by a security expert or automatically synthesized by Phoenix</li>
             <li>Based on corrective actions available to Phoenix, a defense system can either be deployed in a baseband processor or inside a mobile application</li>
           </ul>
-          <p class="lead">Following are the two ways <em>Phoenix</em> can be deployed:</p> 
+     </div>
+  </section>
+
+  <section id="implementation" class="bg-light">
+    <div class="container">
+      <h2>Implementation</h2>
+        <p class="lead">Following are the two ways <em>Phoenix</em> can be deployed:</p> 
           <div class="col-lg-12">
             <div class="row">
               <div class="col-lg-6">
                 <figure class="figure">
                   <img src="assets/images/phoenix_modem.png" alt="Phoenix in Modem" class="img-fluid" style="width: 90%; height: 90%;">
-                  <figcaption class="figure-caption text-center">Phoenix deployed in the modem chip</figcaption>
+                  <figcaption class="figure-caption text-center">Figure 1: Phoenix deployed in the modem chip</figcaption>
                 </figure>
               </div>
               <div class="col-lg-6">
                 <figure class="figure"> 
                 <img src="assets/images/phoenix_app.png" alt="Phoenix in Modem" class="img-fluid" style="height: 80%; width: 80%;"> 
-                <figcaption class="fig-caption text-center">Phoenix deployed in a mobile application</figcaption>
-              </figure>       
+                <figcaption class="fig-caption text-center">Figure 2: Phoenix deployed in a mobile application</figcaption>
+              </figure>     
               </div>
+              <p class="lead">Following are the key components that constitute Phoenix (deployed as an android app)</p><br/>
             </div>
           </div>
-      </div>
+          <h4>Message Extractor</h3>
+          <p class="lead">Firstly the message extractor reads events from the baseband processor. We used MobileInsight's dissector to efficiently capture traffic of NAS and RRC Layers. We then apply required propositions and forward the message to the monitor.</p>
+          <h4>Monitor Component</h3>
+          <p class="lead">We implemented our own monitors using Python For Android since MobileInsight is written in Python. Now let's discuss implementation of each monitor against attack signatures.</p>
+          <ul>
+            <li><strong>DFA:</strong> DFA monitors the set of transitions, list of accepting states, current state and the alphabet in memory. If transitions lands on a non-accepting state it is considered an attack.</li>
+            <li><strong>MM:</strong> Mealy Machine monitors are similar to DFA but since it doesn't have any accepting and non-accepting states, so the output symbol of the transition indicates which particular attack has occured.</li>
+            <li><strong>PLTL:</strong> We used dynamic programming to monitor PLTL formulas. The monitor stores a single bit for each sub-formulas truth value and uses bitwise operations to identify truth values.</li>
+          </ul>
+    </div>
+  </section>
+
+  <section id="results"> 
+    <div class="container">
+      <h2>Results</h2>
+      <p class="lead">Now lets see how well Phoenix performed in a real world scenario and also have a look at it's energy consumption.</p>
+      <h4>Energy Consumption</h4>
+      <p class="lead">To measure energy consumed when Pheonix is used as an android app we connected the Nexus 6 phone to a Monsoon Power Meter. The results can be seen as follows:</p>
+      <figure class="figure">
+        <img src="assets/images/power_chart.png" alt="Power consumption chart for Phoenix" class="img-fluid float-center mx-auto d-block" style="height: 50%; width: 50%;">
+        <figcaption class="fig-caption text-center">Figure 3: Power Consumption with different monitors running on Phoenix</figcaption>
+      </figure>
+      <h4>Real World Evaluation</h4>
+      <p class="lead">We deployed pheonix on two Pixel 3 devices running on 4 major US Cellular networks. The experiment included running Pheonix for approximately 12 hours using Pixel as our daily devices. Following are the results showing warnings using different monitors in Phoenix:</p>
+      <figure class="figure">
+        <img src="assets/images/real_world.png" alt="Real World Evaluation running Phoenix on daily use devices" class="img-fluid mx-auto d-block mb-3" style="width: 50%; height: 50%;">
+        <figcaption class="fig-caption text-center">Figure 4: Warnings triggered when Phoenix ran on Pixel 3</figcaption>
+      </figure>
+      <p class="lead">As evident from the figure above we can see that DFA proves to be inadequate and produces a large amount of false warnings. Mealy machine on other hand produced no false warnings and thus won't disturb the user with false alarms. Whereas, PLTL produced some warnings which upon inspection turned out to be actual misconfigurations on part of the cellular providers. For example, we found that EMM information is sent in plaintext which is actual misconfiguration by the said cellular providers.</p>
     </div>
   </section>
 
